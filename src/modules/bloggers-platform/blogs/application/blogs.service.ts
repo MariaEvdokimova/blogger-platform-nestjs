@@ -39,10 +39,10 @@ export class BlogsService {
   }
 
   async deleteBlog(id: string) {
-    const post = await this.blogsRepository.findOrNotFoundFail(id);
+    const blog = await this.blogsRepository.findOrNotFoundFail(id);
 
-    post.makeDeleted();
+    blog.makeDeleted();
 
-    await this.blogsRepository.save(post);
+    await this.blogsRepository.save(blog);
   }
 }

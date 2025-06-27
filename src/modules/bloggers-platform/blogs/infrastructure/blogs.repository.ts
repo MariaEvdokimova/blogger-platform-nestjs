@@ -14,8 +14,8 @@ export class BlogsRepository {
     });
   }
 
-  async save(post: BlogDocument): Promise<BlogDocument> {
-    return await post.save();
+  async save(blog: BlogDocument): Promise<BlogDocument> {
+    return await blog.save();
   }
 
   async findOrNotFoundFail(id: string): Promise<BlogDocument> {
