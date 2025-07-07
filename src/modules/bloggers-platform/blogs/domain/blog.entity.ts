@@ -3,6 +3,23 @@ import { HydratedDocument, Model } from "mongoose";
 import { CreateBlogDomainDto } from "./dto/create-blog.domain.dto";
 import { UpdateBlogDto } from "../dto/update-blog.dto";
 
+export const nameConstraints = {
+  minLength: 1,
+  maxLength: 15,
+};
+
+export const descriptionConstraints = {
+  minLength: 1,
+  maxLength: 500,
+};
+
+export const websiteUrlConstraints = {
+  minLength: 1,
+  maxLength: 100,
+  match: /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/,
+};
+
+
 //флаг timestemp автоматичеки добавляет поля upatedAt и createdAt
 /**
  * Blog Entity Schema
