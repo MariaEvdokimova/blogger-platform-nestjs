@@ -28,4 +28,22 @@ export class UsersRepository {
 
     return user;
   }
+
+  async doesExistByLoginOrEmail(
+    login: string,
+    email: string
+  ): Promise< UserDocument | null> {
+    return this.UserModel.findOne({
+      $or: [{ email }, { login }],
+      deletedAt: null
+    });
+  }
+
+  async findByEmail( email: string ): Promise<UserDocument | null> {
+    return this.UserModel.findOne({ email, deletedAt: null });
+  }
+
+  async findUserByConfirmationCode ( code: string ): Promise<UserDocument | null> {
+    return this.UserModel.findOne({ "confirmationCode": code, deletedAt: null });
+  }
 }

@@ -1,6 +1,24 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Model } from "mongoose";
 import { CreateUserDomainDto } from "./dto/create-user.domain.dto";
+import { add } from "date-fns/add";
+
+export const loginConstraints = {
+  minLength: 3,
+  maxLength: 10,
+  match: /^[a-zA-Z0-9_-]*$/,
+};
+
+export const passwordConstraints = {
+  minLength: 6,
+  maxLength: 20,
+};
+
+export const emailConstraints = {
+  minLength: 5,
+  maxLength: 500,
+  match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+};
 
 //флаг timestemp автоматичеки добавляет поля upatedAt и createdAt
 /**
@@ -14,7 +32,7 @@ export class User {
    * @type {string}
    * @required
    */
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, ...loginConstraints })
   login: string;
  
   /**
@@ -30,7 +48,7 @@ export class User {
    * @type {string}
    * @required
    */
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, ...emailConstraints })
   email: string;
  
   /**
@@ -41,10 +59,20 @@ export class User {
   @Prop({ type: Boolean, required: true, default: false })
   isEmailConfirmed: boolean;
  
-/* ???????? // @Prop(NameSchema) this variant from doc. doesn't make validation for inner object
-  @Prop({ type: NameSchema })
-  name: Name;
- */
+  /**
+   * expiration code Date
+   * @type {Date | null}
+   * @default null
+   */
+  @Prop({ type: Date, nullable: true, default: null })
+  expirationDate: Date | null;
+
+    /**
+   * confirmation code
+   * @type {string}
+   */
+  @Prop({ type: String, required: false })
+    confirmationCode: string;
 
   /**
    * Creation timestamp
@@ -99,6 +127,31 @@ export class User {
     this.deletedAt = new Date();
   }
  
+  /**
+   * Set user confirmation code
+   * @param {string} code - The dcode
+   */
+  setConfirmationCode(code: string) {
+    const expirationDate = add(new Date(), { hours: 1 });
+
+    this.expirationDate = expirationDate;
+    this.confirmationCode = code;
+  }
+
+  /**
+   * Set Email Confirmed true
+   */
+  updateEmailConfirmed (): void {
+    this.isEmailConfirmed = true;
+  }
+
+  /**
+   * update Password Hash
+   */
+  updatePasswordHash( passwordHash: string ): void {
+    this.passwordHash = passwordHash;
+  }
+
   /**
    * Updates the user instance with new data
    * Resets email confirmation if email is updated
