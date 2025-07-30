@@ -4,12 +4,12 @@ import { User, UserModelType } from '../domain/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { CryptoService } from './crypto.service';
-import { DomainException } from 'src/core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from 'src/core/exceptions/domain-exception-codes';
-import { UuidService } from './uuid.service';
-import { EmailService } from 'src/modules/notifications/email.service';
-import { EmailExamples } from 'src/modules/notifications/email-examples';
+import { CryptoService } from './services/crypto.service';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
+import { UuidService } from './services/uuid.service';
+import { EmailService } from '../../../modules/notifications/email.service';
+import { EmailExamples } from '../../../modules/notifications/email-examples';
 import { RegistrationConfirmationInputDto } from '../api/input-dto/registration-confirmation.input-dto';
 import { RegistrationEmailResendingInputDto } from '../api/input-dto/registration-email-resending.input-dto';
 
@@ -42,7 +42,6 @@ export class UsersService {
           field: 'email'
         }]
       });
-        //( `The email is not unique`, 'email' );
       } else {  
         throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -52,7 +51,6 @@ export class UsersService {
           field: 'login'
         }]
       });
-        //( `The login is not unique`, 'login' );
       }
     }
 

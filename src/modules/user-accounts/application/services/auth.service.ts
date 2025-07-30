@@ -1,18 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import { UsersRepository } from "../infrastructure/users.repository";
-import { UserContextDto } from "../dto/user-context.dto";
+import { UsersRepository } from "../../infrastructure/users.repository";
 import { CryptoService } from "./crypto.service";
-import { JwtService } from "@nestjs/jwt";
-import { PasswordRecoveryInputDto } from "../api/input-dto/password-recovery.input-dto";
-import { NewPasswordInputDto } from "../api/input-dto/new-password.input-dto";
-import { DomainException } from "src/core/exceptions/domain-exceptions";
-import { DomainExceptionCode } from "src/core/exceptions/domain-exception-codes";
+import { UserContextDto } from "../../dto/user-context.dto";
+// import { JwtService } from "@nestjs/jwt";
+// import { PasswordRecoveryInputDto } from "../api/input-dto/password-recovery.input-dto";
+// import { NewPasswordInputDto } from "../api/input-dto/new-password.input-dto";
+// import { DomainException } from "../../../core/exceptions/domain-exceptions";
+// import { DomainExceptionCode } from "../../../core/exceptions/domain-exception-codes";
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersRepository: UsersRepository,
-    private jwtService: JwtService,
+    ///private jwtService: JwtService,
     private cryptoService: CryptoService,
   ) {}
   async validateUser(
@@ -35,7 +35,7 @@ export class AuthService {
 
     return { id: user.id.toString() };
   }
-
+/*
   async login(userId: string) {
     const accessToken = this.jwtService.sign({ id: userId } as UserContextDto);
 
@@ -67,4 +67,5 @@ export class AuthService {
     user.updatePasswordHash( passwordHash );
     await this.usersRepository.save( user );
   }  
+  */
 }

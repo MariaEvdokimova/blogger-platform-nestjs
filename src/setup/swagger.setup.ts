@@ -5,7 +5,17 @@ import { GLOBAL_PREFIX } from './global-prefix.setup';
 export function swaggerSetup(app: INestApplication) {
   const config = new DocumentBuilder()
     .setTitle('BLOGGER API')
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JwtAuth', // Это имя security scheme, можно использовать в @ApiBearerAuth()
+    )
     .setVersion('1.0')
     .addBasicAuth(
        {

@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Post, PostModelType } from "../../domain/post.entity";
 import { PostViewDto } from "../../api/view-dto/posts.view-dto";
 import { GetPostsQueryParams } from "../../api/input-dto/get-posts-query-params.input-dto";
-import { PaginatedViewDto } from "src/core/dto/base.paginated.view-dto";
+import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { FilterQuery, Types } from "mongoose";
 
 @Injectable()
@@ -30,7 +30,7 @@ export class PostsQueryRepository {
     const filter: FilterQuery<Comment> = {
       deletedAt: null,
       blogId: new Types.ObjectId(blogId)
-    };
+    }; 
 
     const posts = await this.PostModel.find(filter)
       .sort({ [query.sortBy]: query.sortDirection })

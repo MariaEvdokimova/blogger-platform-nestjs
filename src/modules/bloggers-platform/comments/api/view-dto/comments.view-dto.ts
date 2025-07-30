@@ -20,15 +20,17 @@ export class CommentViewDto {
 
     dto.id = comment._id.toString();
     dto.content = comment.content;
-    dto.commentatorInfo.userId = comment.commentatorInfo.userId.toString();
-    dto.commentatorInfo.userLogin = comment.commentatorInfo.userLogin;;
-    dto.likesInfo.myStatus = comment.likesInfo.myStatus;
+    dto.commentatorInfo = {
+      userId: comment.commentatorInfo.userId.toString(),
+      userLogin: comment.commentatorInfo.userLogin
+    };
+    //dto.likesInfo.myStatus = comment.likesInfo.myStatus;
     dto.createdAt = comment.createdAt;
 
     dto.likesInfo = {
-      likesCount: comment.likesInfo.likesCount || 0,
-      dislikesCount: comment.likesInfo.dislikesCount || 0,
-      myStatus: comment.likesInfo.myStatus || LikeStatus.None, 
+      likesCount: comment?.likesInfo?.likesCount || 0,
+      dislikesCount: comment?.likesInfo?.dislikesCount || 0,
+      myStatus: comment?.likesInfo.myStatus || LikeStatus.None, 
     };
 
     return dto;
