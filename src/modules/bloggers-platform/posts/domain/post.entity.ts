@@ -1,8 +1,24 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Model, Types } from "mongoose";
-import { ExtendedLikesInfo, ExtendedLikesInfoSchema } from "./extendedLikesInfo.entity";
+import { ExtendedLikesInfo, ExtendedLikesInfoSchema, LikeStatus } from "./extendedLikesInfo.entity";
 import { CreatePostDomainDto } from "./dto/create-post.domain.dto";
 import { UpdatePostDomainDto } from "../dto/update-post.dto";
+import { NewestLikes } from "./newestLikes.entity";
+
+export const titleConstraints = {
+  minLength: 1,
+  maxLength: 30,
+};
+
+export const shortDescriptionConstraints = {
+  minLength: 1,
+  maxLength: 100,
+};
+
+export const contentConstraints = {
+  minLength: 1,
+  maxLength: 1000,
+};
 
 //флаг timestemp автоматичеки добавляет поля upatedAt и createdAt
 /**
@@ -87,6 +103,12 @@ export class Post {
     post.content = dto.content;
     post.blogId = dto.blogId;
     post.blogName = dto.blogName; 
+    post.extendedLikesInfo = {
+      likesCount: 0,
+      dislikesCount: 0,
+      myStatus: LikeStatus.None,
+      newestLikes: []
+    }
 
     return post as PostDocument;
   }
@@ -114,6 +136,39 @@ export class Post {
     }
     this.deletedAt = new Date();
   }
+
+  updateLikesInfo ( 
+    likeStatus: LikeStatus, 
+    userPostStatus: LikeStatus | undefined,
+  ): void {
+
+    switch (likeStatus) {
+      case LikeStatus.None:
+        this.extendedLikesInfo.likesCount > 0 && this.extendedLikesInfo.likesCount--;
+        this.extendedLikesInfo.dislikesCount > 0 && this.extendedLikesInfo.dislikesCount--;
+        break;
+
+      case LikeStatus.Like:
+        if (userPostStatus === LikeStatus.Dislike && this.extendedLikesInfo.dislikesCount > 0) {
+          this.extendedLikesInfo.dislikesCount--;
+        }
+        this.extendedLikesInfo.likesCount++;
+
+        break;
+
+      case LikeStatus.Dislike:
+        if (userPostStatus === LikeStatus.Like && this.extendedLikesInfo.likesCount > 0) {
+          this.extendedLikesInfo.likesCount--;
+        }
+        this.extendedLikesInfo.dislikesCount++;
+        break;
+    }
+  }
+
+  updateNewestLikes( newestLikes: NewestLikes[]): void {
+    this.extendedLikesInfo.newestLikes = newestLikes;
+  }
+
 
 }
 export const PostSchema = SchemaFactory.createForClass(Post);

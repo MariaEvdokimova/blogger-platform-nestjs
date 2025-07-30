@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { descriptionConstraints, nameConstraints, websiteUrlConstraints } from "../../domain/blog.entity";
-import { IsStringWithTrim } from "src/core/decorators/validation/is-string-with-trim";
+import { IsStringWithTrim } from '../../../../../core/decorators/validation/is-string-with-trim';
 import { Matches } from "class-validator";
 
 //Сюда могут быть добавлены декораторы swagger

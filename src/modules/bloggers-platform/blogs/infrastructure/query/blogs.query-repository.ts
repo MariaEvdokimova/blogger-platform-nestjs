@@ -3,8 +3,8 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Blog, BlogDocument, BlogModelType } from "../../domain/blog.entity";
 import { BlogViewDto } from "../../api/view-dto/blogs.view-dto";
 import { GetBlogsQueryParams } from "../../api/input-dto/get-blogs-query-params.input-dto";
-import { PaginatedViewDto } from "src/core/dto/base.paginated.view-dto";
 import { FilterQuery } from "mongoose";
+import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 
 @Injectable()
 export class BlogsQueryRepository {

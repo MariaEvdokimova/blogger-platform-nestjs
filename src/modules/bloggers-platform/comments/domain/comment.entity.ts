@@ -1,8 +1,13 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Model, Types } from "mongoose";
-import { СommentatorInfo, СommentatorInfoSchema } from "./сommentatorInfo.entity";
-import { LikesInfo, LikesInfoSchema } from "./likesInfo.entity";
+import { СommentatorInfo, СommentatorInfoSchema } from "./commentatorInfo.entity";
+import { LikesInfo, LikesInfoSchema, LikeStatus } from "./likesInfo.entity";
+import { CreateCommentDomainDto } from "./dto/create-comment.domain.dto";
 
+export const contentConstraints = {
+  minLength: 20,
+  maxLength: 300,
+};
 //флаг timestemp автоматичеки добавляет поля upatedAt и createdAt
 /**
  * Comment Entity Schema
@@ -56,21 +61,27 @@ export class Comment {
    * Deletion timestamp, nullable, if date exist, means entity soft deleted
    * @type {Date | null}
    */
-  @Prop({ type: Date, nullable: true })
+  @Prop({ type: Date, nullable: true, default: null })
   deletedAt: Date | null;
  
-  /*static createInstance(dto: CreateBlogDomainDto): BlogDocument {
-    const blog = new this();
-    blog.name = dto.name;
-    blog.description = dto.description;
-    blog.websiteUrl = dto.websiteUrl;
-    blog.isMembership = false; 
-
-    return blog as BlogDocument;
+  static createInstance(dto: CreateCommentDomainDto): CommentDocument {
+    const comment = new this();
+    comment.content = dto.content;
+    comment.commentatorInfo = {
+      userLogin: dto.userLogin,
+      userId: dto.userId,
+    };
+    comment.likesInfo = {
+      likesCount: 0,
+      dislikesCount: 0,
+      myStatus: LikeStatus.None
+    }
+    comment.postId = new Types.ObjectId(dto.postId)
+    return comment as CommentDocument;
   }
- */
+
   /**
-   * Marks the blog as deleted
+   * Marks the comment as deleted
    * Throws an error if already deleted
    * @throws {Error} If the entity is already deleted
    * DDD continue: инкапсуляция (вызываем методы, которые меняют состояние\св-ва) объектов согласно правилам этого объекта
@@ -82,6 +93,33 @@ export class Comment {
     this.deletedAt = new Date();
   }
 
+  updateContent( content: string ) {
+    this.content = content;
+  }
+
+  updateLikesInfo ( likeStatus: LikeStatus, userCommentStatus: LikeStatus | undefined): void {
+    switch (likeStatus) {
+      case LikeStatus.None:
+        this.likesInfo.likesCount > 0 && this.likesInfo.likesCount--;
+        this.likesInfo.dislikesCount > 0 && this.likesInfo.dislikesCount--;
+        break;
+
+      case LikeStatus.Like:
+        if (userCommentStatus === LikeStatus.Dislike && this.likesInfo.dislikesCount > 0) {
+          this.likesInfo.dislikesCount--;
+        }
+        this.likesInfo.likesCount++;
+        break;
+
+      case LikeStatus.Dislike:
+        if (userCommentStatus === LikeStatus.Like && this.likesInfo.likesCount > 0) {
+          this.likesInfo.likesCount--;
+        }
+        this.likesInfo.dislikesCount++;
+        break;
+    }
+  }
+  
 }
 export const CommentSchema = SchemaFactory.createForClass(Comment);
  
