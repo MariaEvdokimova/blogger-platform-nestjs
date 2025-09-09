@@ -13,7 +13,9 @@ import { UpdateCommentLikeStatusInputDto } from "./input-dto/comment-like-status
 import { UpdateCommentLikeStatusCommand } from "../application/usecases/update-comment-like-status.usecase";
 import { OptionalJwtGuard } from "../../../user-accounts/guards/bearer/jwt-optional.quard";
 import { UserId } from "../../../user-accounts/guards/decorators/param/user-id.decorator";
+import { SkipThrottle } from "@nestjs/throttler";
 
+@SkipThrottle()
 @Controller('comments')
 export class CommentsController {
   constructor( 

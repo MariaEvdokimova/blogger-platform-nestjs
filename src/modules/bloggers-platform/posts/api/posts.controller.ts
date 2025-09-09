@@ -28,7 +28,9 @@ import { UpdatePostLikeStatusCommand } from "../application/usecases/update-post
 import { BasicAuthGuard } from "../../../user-accounts/guards/basic/basic-auth.guard";
 import { UserId } from "../../../user-accounts/guards/decorators/param/user-id.decorator";
 import { OptionalJwtGuard } from "../../../user-accounts/guards/bearer/jwt-optional.quard";
+import { SkipThrottle } from "@nestjs/throttler";
 
+@SkipThrottle()
 @Controller('posts')
 export class PostsController {
   constructor(

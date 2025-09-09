@@ -21,7 +21,9 @@ import { BasicAuthGuard } from "../../../../modules/user-accounts/guards/basic/b
 import { UpdateBlogCommand } from "../application/usecases/update-blog.usecase";
 import { OptionalJwtGuard } from "src/modules/user-accounts/guards/bearer/jwt-optional.quard";
 import { UserId } from "src/modules/user-accounts/guards/decorators/param/user-id.decorator";
+import { SkipThrottle } from "@nestjs/throttler";
 
+@SkipThrottle()
 @Controller('blogs')
 export class BlogsController {
   constructor(

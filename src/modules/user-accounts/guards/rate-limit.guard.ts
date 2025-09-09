@@ -5,6 +5,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { DomainException } from "../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../core/exceptions/domain-exception-codes";
 
+//!!!!!! не используется, тк поставлена библиотека  - nestjs/throttler
 @Injectable()
 export class RateLimitGuard implements CanActivate {
   constructor(

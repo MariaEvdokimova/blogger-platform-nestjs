@@ -4,6 +4,8 @@ import { JwtService } from "@nestjs/jwt";
 import { Types } from "mongoose";
 import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN, REFRESH_TOKEN_STRATEGY_INJECT_TOKEN } from "../../../../user-accounts/constants/auth-tokens.inject-constants";
 import { RequestMetadataDto } from "../../../../user-accounts/dto/request-metadata.dto";
+import { SecurityDeviceRepository } from "src/modules/user-accounts/infrastructure/security-devices.repository";
+import { SecurityDevicesFactory } from "../../factories/security-devices.factory";
 
 export class LoginUserCommand {
   constructor(
@@ -21,22 +23,31 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
 
     @Inject(REFRESH_TOKEN_STRATEGY_INJECT_TOKEN)
     private refreshTokenContext: JwtService,
+
+    private securityDevicesRepository: SecurityDeviceRepository,
+    private readonly securityDevicesFactory: SecurityDevicesFactory,
   ) {}
 
   async execute({ dto }: LoginUserCommand): Promise<{ accessToken: string, refreshToken: string }> {
     let session;
     let payload;
 
-    /*if ( dto.metadata.refreshToken ) {
-      payload = await this.refreshTokenContext.verify( dto.metadata.refreshToken );
-      if (payload) {
-        session = await this.securityDevicesRepository.findByIdAndUserId({ 
-          deviceId: payload.deviceId, 
-          userId: payload.userId 
-        });       
+    try {
+      if (dto.metadata.refreshToken) {
+        payload = await this.refreshTokenContext.verify(dto.metadata.refreshToken);
+  
+        session = await this.securityDevicesRepository.findByDeviceIdAndUserId({
+          deviceId: payload.deviceId,
+          userId: payload.id,
+        });
       }
-    }*/
-    const deviceId =  /*session ? new Types.ObjectId( payload!.deviceId ) :*/ new Types.ObjectId();
+    } catch (error) {
+      console.log("Refres Token verify some error ", error);
+    }
+
+    const deviceId = session
+    ? new Types.ObjectId(payload.deviceId)
+    : new Types.ObjectId();
 
     const accessToken = this.accessTokenContext.sign({
       id: dto.userId,
@@ -44,10 +55,23 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
 
     const refreshToken = this.refreshTokenContext.sign({
       id: dto.userId,
-      deviceId: 'deviceId',
+      deviceId, 
     });
 
-    //console.log('', refreshToken);
+  const createdRefresTokenPayload = await this.refreshTokenContext.verify(refreshToken);
+
+  const device = await this.securityDevicesFactory.create({
+    userId: dto.userId,
+    deviceId,
+    deviceName: dto.metadata.userAgent,
+    ip: dto.metadata.ip,
+    iat: createdRefresTokenPayload.iat,
+    exp: createdRefresTokenPayload.exp,
+   });
+
+   await this.securityDevicesRepository.save( device ); 
+
+ console.log('!!!refreshToken !!!!!!!!!!!! ', refreshToken);
 
     return {
       accessToken,
