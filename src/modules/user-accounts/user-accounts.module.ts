@@ -30,6 +30,18 @@ import { GetMeQueryHandler } from './application/queries/get-me.query';
 import { AuthService } from './application/services/auth.service';
 import { RateLimit, RateLimitSchema } from './domain/rate-limit.entity';
 import { RateLimitRepository } from './infrastructure/rate-limit.repository';
+import { UserAccountsConfig } from './config/user-accounts.config';
+import { DeleteDeviceByIdUseCase } from './application/usecases/devices/delete-device-by-id.usecase';
+import { DeleteDevicesUseCase } from './application/usecases/devices/delete-devices.usecase';
+import { RefreshTokenUseCase } from './application/usecases/users/refresh-token.usecase';
+import { GetSecurityDevicesQueryHandler } from './application/queries/get-security-devices.query';
+import { SecurityDevice, SecurityDeviceSchema } from './domain/security-device.entity';
+import { SecurityDevicesController } from './api/security-devices.controller';
+import { SecurityDevicesQueryRepository } from './infrastructure/query/security-devices.query-repository';
+import { SecurityDeviceRepository } from './infrastructure/security-devices.repository';
+import { CookieService } from './application/services/cookie.service';
+import { SecurityDevicesFactory } from './application/factories/security-devices.factory';
+import { LogoutUseCase } from './application/usecases/users/logout-user.usecase';
  
 const commandHandlers = [
   CreateUserUseCase,
@@ -40,56 +52,55 @@ const commandHandlers = [
   RegistrationConfirmationUseCase,
   RegistrationEmailResendingUseCase,
   PasswordRecoveryUseCase,
+  DeleteDeviceByIdUseCase,
+  DeleteDevicesUseCase,
+  LogoutUseCase,
+  RefreshTokenUseCase,
 ];
 
 const queryHandlers = [
   GetUsersQueryHandler,
   GetMeQueryHandler,
+  GetSecurityDevicesQueryHandler,
 ];
 
 @Module({
   imports: [
-    /*JwtModule.register({
-      secret: 'access-token-secret', //TODO: move to env. will be in the following lessons
-      signOptions: { expiresIn: '60m' }, // Время жизни токена
-    }),*/
     CqrsModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: RateLimit.name, schema: RateLimitSchema},
+      { name: SecurityDevice.name, schema: SecurityDeviceSchema}, 
     ]),
     NotificationsModule,
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [    
     ...commandHandlers,
     ...queryHandlers,
     //UsersService,
     UsersRepository,
-     {
+    {
       provide: ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
-      useFactory: (): JwtService => {
+      useFactory: (userAccountConfig: UserAccountsConfig): JwtService => {
         return new JwtService({
-          secret: 'access-token-secret', //TODO: move to env. will be in the following lessons
-          signOptions: { expiresIn: '6m' },
+          secret: userAccountConfig.accessTokenSecret,
+          signOptions: { expiresIn: userAccountConfig.accessTokenExpireIn },
         });
       },
-      inject: [
-        /*TODO: inject configService. will be in the following lessons*/
-      ],
+      inject: [UserAccountsConfig],
     },
     {
       provide: REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
-      useFactory: (): JwtService => {
+      useFactory: (userAccountConfig: UserAccountsConfig): JwtService => {
         return new JwtService({
-          secret: 'refresh-token-secret', //TODO: move to env. will be in the following lessons
-          signOptions: { expiresIn: '10m' },
+          secret: userAccountConfig.refreshTokenSecret,
+          signOptions: { expiresIn: userAccountConfig.refreshTokenExpireIn },
         });
       },
-      inject: [
-        /*TODO: inject configService. will be in the following lessons*/
-      ],
+      inject: [UserAccountsConfig],
     },
+
     UsersQueryRepository,
     AuthService, 
     AuthQueryRepository,
@@ -101,10 +112,11 @@ const queryHandlers = [
     LocalStrategy,
     UsersFactory,
     RateLimitRepository,
-
-    // SecurityDevicesQueryRepository,
-    // UsersExternalQueryRepository,
-    // UsersExternalService,
+    UserAccountsConfig,
+    SecurityDevicesQueryRepository,
+    SecurityDeviceRepository,
+    CookieService,
+    SecurityDevicesFactory
   ],
   exports: [JwtStrategy, UsersRepository],
 })

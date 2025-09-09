@@ -1,7 +1,9 @@
 import { Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Connection } from 'mongoose';
 
+@SkipThrottle()
 @Controller('testing')
 export class TestingController {
   constructor(

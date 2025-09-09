@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { User, UserModelType } from "../../domain/user.entity";
+import { User, UserDocument, UserModelType } from "../../domain/user.entity";
 import { FilterQuery } from "mongoose";
 import { UserViewDto } from "../../api/view-dto/users.view-dto";
 import { GetUsersQueryParams } from "../../api/input-dto/get-users-query-params.input-dto";
@@ -24,6 +24,15 @@ export class UsersQueryRepository {
     }
 
     return UserViewDto.mapToView(user);
+  }
+
+  async findById( id: string ): Promise<UserDocument | null> {
+    const user = await this.UserModel.findOne({ 
+      _id: id, 
+      deletedAt: null 
+    });
+    
+    return user ? user : null;
   }
 
   async getAll(

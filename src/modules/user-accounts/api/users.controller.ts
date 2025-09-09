@@ -22,7 +22,9 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/admins/create-user.usecase';
 import { DeleteUserCommand } from '../application/usecases/admins/delete-user.usecase';
 import { GetUsersQuery } from '../application/queries/get-users.query';
- 
+import { SkipThrottle } from '@nestjs/throttler';
+
+@SkipThrottle()
 @Controller('users')
 @UseGuards(BasicAuthGuard)
 @ApiBasicAuth('basicAuth')
@@ -36,7 +38,7 @@ export class UsersController {
   }
  
   @Get()
-  async getAll(@Query() query: GetUsersQueryParams): Promise<PaginatedViewDto<UserViewDto[]>> {
+  getAll(@Query() query: GetUsersQueryParams): Promise<PaginatedViewDto<UserViewDto[]>> {
     return this.queryBus.execute(new GetUsersQuery( query ));
     //return this.usersQueryRepository.getAll( query );
   }
@@ -56,7 +58,7 @@ export class UsersController {
   @ApiParam({ name: 'id' }) //для сваггера
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id', ObjectIdValidationPipe) id: string, //ObjectIdValidationTransformationPipe) id: Types.ObjectId,//
+  deleteUser(@Param('id', ObjectIdValidationPipe) id: string, //ObjectIdValidationTransformationPipe) id: Types.ObjectId,//
   ): Promise<void> {
     return this.commandBus.execute(new DeleteUserCommand(id));
     //return this.usersService.deleteUser(id);
